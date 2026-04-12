@@ -1399,8 +1399,9 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
+
 <!-- PASSWORD PROTECTION -->
-<div id="login-screen" style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:99999;">
+<div id="login-screen" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;display:flex;align-items:center;justify-content:center;z-index:999999;">
   <div style="background:#111;padding:30px;border-radius:10px;text-align:center;">
     <h2 style="color:#fff;margin-bottom:10px;">Enter Password</h2>
     <input type="password" id="site-pass" placeholder="Password" style="padding:10px;margin-bottom:10px;width:200px;">
@@ -1411,12 +1412,13 @@ document.addEventListener('DOMContentLoaded',()=>{
 </div>
 
 <script>
-const SITE_PASSWORD = "0606"; // change this
+const SITE_PASSWORD = "0606";
 
 function checkPassword(){
   const input = document.getElementById('site-pass').value;
   if(input === SITE_PASSWORD){
     document.getElementById('login-screen').style.display = 'none';
+    document.body.style.overflow = 'auto';
     localStorage.setItem('site_auth','true');
   } else {
     document.getElementById('error-msg').style.display = 'block';
@@ -1424,11 +1426,14 @@ function checkPassword(){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
+  document.body.style.overflow = 'hidden';
   if(localStorage.getItem('site_auth') === 'true'){
     document.getElementById('login-screen').style.display = 'none';
+    document.body.style.overflow = 'auto';
   }
 });
 </script>
+
 
 </body>
 </html>
