@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- LOGIN SCREEN -->
+<div id="loginScreen" style="position:fixed;inset:0;background:#f5f5f5;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;">
+
+  <h2>🔐 Enter Password</h2>
+
+  <input type="password" id="passwordInput" placeholder="Password" style="padding:10px;margin:10px;">
+
+  <button onclick="checkPassword()" style="padding:10px 20px;">Login</button>
+
+  <p id="error" style="color:red;"></p>
+
+</div>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Finance Tracker</title>
@@ -142,7 +154,7 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
 </style>
 </head>
 <body>
-<div class="app">
+<div id="dashboard" class="app" style="display:none;">
 <nav class="sidebar">
   <div class="sidebar-logo"><h1>My <span>Finance</span></h1><p>Personal tracker · 2026</p></div>
   <div class="sidebar-section">Overview</div>
@@ -1391,6 +1403,17 @@ function toast(msg,type='ok'){
 // ════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════
+  function checkPassword() {
+  const correctPassword = "0606"; // change this
+  const input = document.getElementById("passwordInput").value;
+
+  if (input === correctPassword) {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+  } else {
+    document.getElementById("error").innerText = "Wrong password";
+  }
+}
 document.addEventListener('DOMContentLoaded',()=>{
   loadState();
   const last=S.months[S.months.length-1];
