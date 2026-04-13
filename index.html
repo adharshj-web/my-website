@@ -170,6 +170,11 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
 .bgt-sep{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);padding:10px 0 6px;border-top:0.5px solid var(--border2);margin-top:8px;display:flex;align-items:center;gap:8px;}
 .bgt-sep::after{content:'';flex:1;height:0.5px;background:var(--border2);}
 .bgt-sep:first-child{border-top:none;margin-top:0;}
+/* BUDGET TOTALS BANNER — FIX 1 */
+.bgt-totals-banner{background:var(--bg4);border:0.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+.bgt-total-item{display:flex;flex-direction:column;gap:2px;}
+.bgt-total-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.7px;}
+.bgt-total-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;}
 /* LOG ACTUALS — new layout */
 .actuals-layout{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
 .act-form-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:16px;}
@@ -185,6 +190,15 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
 .ms-item:hover{background:var(--bg4);color:var(--text);}
 .ms-item input[type=checkbox]{accent-color:var(--gold);cursor:pointer;}
 .ms-actions{display:flex;gap:5px;padding-top:5px;border-top:0.5px solid var(--border);margin-top:4px;}
+/* BVA MULTI-SELECT — FIX 2 */
+.bva-filter-wrap{position:relative;display:inline-block;}
+.bva-filter-btn{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--r-xs);color:var(--text2);font-family:inherit;font-size:11px;padding:4px 8px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;}
+.bva-filter-btn:hover{border-color:var(--border3);}
+.bva-filter-dropdown{position:absolute;top:100%;right:0;z-index:200;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r-sm);padding:6px;min-width:230px;max-height:300px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+.bva-filter-dropdown.hidden{display:none;}
+/* BVA SUBTOTAL BANNER — FIX 2 */
+.bva-subtotal-banner{background:var(--bg3);border:0.5px solid var(--gold);border-radius:var(--r-xs);padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.bva-subtotal-banner.hidden{display:none;}
 /* ASSETS PAGE */
 .asset-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border);}
 .asset-row:last-child{border-bottom:none;}
@@ -237,7 +251,7 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
 <!-- DASHBOARD -->
 <div class="page active" id="page-dashboard">
   <div class="topbar">
-    <div class="page-title">Dashboard</div>
+    <div class="page-title" id="topbar-dashboard">Dashboard</div>
     <div class="search-wrap">
       <span class="search-icon">⌕</span>
       <input class="search-input" id="smart-search" type="text" placeholder="Smart search — transactions, categories, amounts…" oninput="doSmartSearch(this.value)" onblur="setTimeout(()=>hideSearch(),200)" onfocus="doSmartSearch(this.value)">
@@ -270,19 +284,23 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
 
 <!-- SET BUDGETS -->
 <div class="page" id="page-budgets">
-  <div class="topbar"><div class="page-title">Set Budgets</div></div>
+  <!-- FIX 4: topbar title uses id so we can update it in real-time -->
+  <div class="topbar"><div class="page-title" id="topbar-budgets">Set Budgets</div></div>
   <div class="month-row" id="bgt-months"></div>
   <div class="g2">
     <div class="card">
       <div class="sec-hdr"><div class="sec-title">AED Budgets</div><button class="btn btn-ghost btn-sm" onclick="addBudgetRow('AED')">+ Add Row</button></div>
+      <!-- FIX 1: budget totals banner for AED -->
+      <div class="bgt-totals-banner" id="bgt-totals-aed"></div>
       <div id="bgt-aed-rows"></div>
     </div>
     <div class="card">
       <div class="sec-hdr"><div class="sec-title">INR Budgets</div><button class="btn btn-ghost btn-sm" onclick="addBudgetRow('INR')">+ Add Row</button></div>
+      <!-- FIX 1: budget totals banner for INR -->
+      <div class="bgt-totals-banner" id="bgt-totals-inr"></div>
       <div id="bgt-inr-rows"></div>
     </div>
   </div>
-  <!-- Single common save button -->
   <div style="display:flex;justify-content:flex-end;margin-top:14px;">
     <button class="btn btn-gold" onclick="saveBudgets()" style="padding:9px 22px;font-size:13px;">💾 Save All Budgets</button>
   </div>
@@ -290,9 +308,8 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
 
 <!-- LOG ACTUALS -->
 <div class="page" id="page-actuals">
-  <div class="topbar"><div class="page-title">Log Actuals</div></div>
+  <div class="topbar"><div class="page-title" id="topbar-actuals">Log Actuals</div></div>
   <div class="actuals-layout">
-    <!-- Left: Entry form — columnar vertical layout -->
     <div class="act-form-card">
       <div class="sec-hdr">
         <div class="sec-title" id="act-form-title">New Transaction</div>
@@ -322,7 +339,6 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
       </div>
     </div>
 
-    <!-- Right: filter + list -->
     <div class="act-list-card">
       <div class="sec-hdr" style="flex-wrap:wrap;gap:8px;">
         <div class="sec-title">Transactions</div>
@@ -330,7 +346,6 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
           <select id="act-filter-month" onchange="onActFilterMonthChange()" style="background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--r-xs);color:var(--text2);font-family:inherit;font-size:11px;padding:3px 7px;outline:none;"></select>
           <button class="ctab aed active" id="al-aed" onclick="setActListCur('AED')" style="font-size:10px;padding:3px 8px;">AED</button>
           <button class="ctab inr" id="al-inr" onclick="setActListCur('INR')" style="font-size:10px;padding:3px 8px;">INR</button>
-          <!-- Multi-select category filter -->
           <div class="multi-select-wrap">
             <button class="multi-select-btn" id="cat-filter-btn" onclick="toggleCatFilter(event)">
               <span id="cat-filter-label">All Categories</span> ▾
@@ -348,7 +363,6 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
           <button class="btn btn-ghost btn-xs" id="clear-filter-btn" onclick="clearCatFilter()" style="display:none;color:var(--red);border-color:var(--red);opacity:0.8;">✕ Clear</button>
         </div>
       </div>
-      <!-- Subtotal banner -->
       <div class="subtotal-banner hidden" id="subtotal-banner"></div>
       <div id="act-list" style="max-height:calc(100vh - 240px);overflow-y:auto;"></div>
     </div>
@@ -357,7 +371,8 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
 
 <!-- BUDGET VS ACTUALS -->
 <div class="page" id="page-bva">
-  <div class="topbar"><div class="page-title">Budget vs Actuals</div></div>
+  <!-- FIX 4: topbar title with id -->
+  <div class="topbar"><div class="page-title" id="topbar-bva">Budget vs Actuals</div></div>
   <div class="month-row" id="bva-months"></div>
   <div class="cur-toggle">
     <button class="ctab aed active" id="bva-aed-tab" onclick="setBvaCur('AED')">AED (UAE)</button>
@@ -372,19 +387,38 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
   </div>
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-      <div class="card-title" id="bva-tbl-title" style="margin-bottom:0;">Expense Detail</div>
-      <div style="display:flex;gap:4px;">
+      <!-- FIX 2: renamed to "Variance Detail" -->
+      <div class="card-title" id="bva-tbl-title" style="margin-bottom:0;">Variance Detail</div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <!-- FIX 2: BvA multi-select filter -->
+        <div class="bva-filter-wrap" id="bva-filter-wrap" style="display:none;">
+          <button class="bva-filter-btn" onclick="toggleBvaFilter(event)">
+            <span id="bva-filter-label">All Items</span> ▾
+          </button>
+          <div class="bva-filter-dropdown hidden" id="bva-filter-dropdown" onclick="event.stopPropagation()">
+            <input class="ms-search" type="text" placeholder="Search…" oninput="filterBvaMsSearch(this.value)" id="bva-ms-search">
+            <div id="bva-ms-items"></div>
+            <div class="ms-actions">
+              <button class="btn btn-ghost btn-xs" onclick="bvaMsSelectAll()">Select All</button>
+              <button class="btn btn-ghost btn-xs" onclick="bvaMsSelectNone()">None</button>
+              <button class="btn btn-gold btn-xs" onclick="applyBvaFilterAndClose()">Apply</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-xs" id="bva-clear-filter-btn" onclick="clearBvaFilter()" style="display:none;color:var(--red);border-color:var(--red);opacity:0.8;">✕ Clear</button>
         <button class="ctab active" id="bva-tbl-exp-tab" onclick="setBvaTblView('expense')" style="color:var(--red);font-size:11px;padding:3px 10px;">Expenses</button>
         <button class="ctab" id="bva-tbl-inc-tab" onclick="setBvaTblView('income')" style="color:var(--green);font-size:11px;padding:3px 10px;">Income</button>
       </div>
     </div>
+    <!-- FIX 2: subtotal banner for BvA filtered rows -->
+    <div class="bva-subtotal-banner hidden" id="bva-subtotal-banner"></div>
     <div class="scroll-x" id="bva-tbody-wrap"></div>
   </div>
 </div>
 
 <!-- CATEGORIES -->
 <div class="page" id="page-categories">
-  <div class="topbar"><div class="page-title">Category Analysis</div></div>
+  <div class="topbar"><div class="page-title" id="topbar-categories">Category Analysis</div></div>
   <div class="month-row" id="cat-months"></div>
   <div class="cur-toggle" style="margin-bottom:12px;">
     <button class="ctab aed active" id="cat-aed-tab" onclick="setCatView('AED')">AED</button>
@@ -609,7 +643,6 @@ hr.dv{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
     <div style="display:flex;gap:8px;"><button class="btn btn-gold" onclick="saveEditTx()">Save</button><button class="btn btn-ghost" onclick="closeModal('modal-edit-tx')">Cancel</button></div>
   </div>
 </div>
-<!-- ADD ASSET MODAL -->
 <div class="mbk" id="modal-asset">
   <div class="modal">
     <div class="modal-title">Add / Edit Asset <button class="mcl" onclick="closeModal('modal-asset')">✕</button></div>
@@ -639,9 +672,9 @@ const DEFAULTS = {
   },
   banks:{AED:['Emirates NBD','Splitwise','Cash'],INR:['Axis','Bank of Baroda','SBI','Splitwise','Cash']},
   budgets:{},
-  budgetComments:{}, // { "Jan'26": { AED: {Cat:comment}, INR: {Cat:comment} } }
+  budgetComments:{},
   actuals:[],
-  assets:[] // [{id,name,aed,inr,notes}]
+  assets:[]
 };
 
 // ════════════════════════════════════════════════════════
@@ -815,6 +848,20 @@ function totalActs(month,cur,type){
 }
 
 // ════════════════════════════════════════════════════════
+//  FIX 1: Compute budget totals split by income/expense cats
+// ════════════════════════════════════════════════════════
+function getBudgetTotals(month, cur){
+  const bgt = getBudgets(month, cur);
+  const incCats = new Set(S.categories.income);
+  let incTotal = 0, expTotal = 0;
+  Object.entries(bgt).forEach(([cat, val]) => {
+    if(incCats.has(cat)) incTotal += (val||0);
+    else expTotal += (val||0);
+  });
+  return {incTotal, expTotal};
+}
+
+// ════════════════════════════════════════════════════════
 //  THEME
 // ════════════════════════════════════════════════════════
 function applyTheme(){
@@ -832,7 +879,7 @@ function toggleTheme(){
 }
 
 // ════════════════════════════════════════════════════════
-//  NAVIGATION
+//  NAVIGATION — FIX 4: update topbar title immediately on pill click
 // ════════════════════════════════════════════════════════
 let activePage='dashboard';
 let activeDashMonth='';
@@ -840,14 +887,32 @@ let activeBvaMonth='';
 let activeCatMonth='';
 let bvaCur='AED';
 let cmpCur='AED';
-let catView='AED'; // 'AED','INR','income'
+let catView='AED';
 let actListCur='AED';
 let activeBgtMonth='';
 let editingTxId=null;
-let bvaTblView='expense'; // 'expense' or 'income'
-// Multi-select filter state
-let selectedCats=new Set(); // empty = all
+let bvaTblView='expense';
+// Multi-select filter state (actuals)
+let selectedCats=new Set();
 let allAvailCats=[];
+// Multi-select filter state (BvA) — FIX 2
+let bvaSelectedCats=new Set();
+let bvaAllCats=[];
+
+// FIX 4: Helper to update topbar title for pages with month context
+function updateTopbarTitle(pg, month){
+  const el = document.getElementById('topbar-'+pg);
+  if(!el) return;
+  const titles = {
+    dashboard: 'Dashboard',
+    budgets: 'Set Budgets',
+    bva: 'Budget vs Actuals',
+    categories: 'Category Analysis'
+  };
+  const base = titles[pg] || '';
+  if(base && month) el.textContent = base + ' — ' + month;
+  else if(base) el.textContent = base;
+}
 
 function nav(pg){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -864,11 +929,22 @@ function renderPage(pg){
   const last=S.months[S.months.length-1];
   if(pg==='dashboard'){
     if(!activeDashMonth)activeDashMonth=last;
-    buildPills('db-months',activeDashMonth,m=>{activeDashMonth=m;renderDashboard();});
+    // FIX 4: pass callback that also updates topbar immediately
+    buildPills('db-months',activeDashMonth,m=>{
+      activeDashMonth=m;
+      updateTopbarTitle('dashboard', m);
+      renderDashboard();
+    });
+    updateTopbarTitle('dashboard', activeDashMonth);
     renderDashboard();
   }else if(pg==='budgets'){
     if(!activeBgtMonth)activeBgtMonth=last;
-    buildPills('bgt-months',activeBgtMonth,m=>{activeBgtMonth=m;renderBudgetForm();});
+    buildPills('bgt-months',activeBgtMonth,m=>{
+      activeBgtMonth=m;
+      updateTopbarTitle('budgets', m);
+      renderBudgetForm();
+    });
+    updateTopbarTitle('budgets', activeBgtMonth);
     renderBudgetForm();
   }else if(pg==='actuals'){
     populateMonthSelects();
@@ -876,11 +952,23 @@ function renderPage(pg){
     refreshActList();
   }else if(pg==='bva'){
     if(!activeBvaMonth)activeBvaMonth=last;
-    buildPills('bva-months',activeBvaMonth,m=>{activeBvaMonth=m;renderBva();});
+    buildPills('bva-months',activeBvaMonth,m=>{
+      activeBvaMonth=m;
+      updateTopbarTitle('bva', m);
+      // Reset BvA filter on month change
+      bvaSelectedCats=new Set();
+      renderBva();
+    });
+    updateTopbarTitle('bva', activeBvaMonth);
     renderBva();
   }else if(pg==='categories'){
     if(!activeCatMonth)activeCatMonth=last;
-    buildPills('cat-months',activeCatMonth,m=>{activeCatMonth=m;renderCategories();});
+    buildPills('cat-months',activeCatMonth,m=>{
+      activeCatMonth=m;
+      updateTopbarTitle('categories', m);
+      renderCategories();
+    });
+    updateTopbarTitle('categories', activeCatMonth);
     renderCategories();
   }else if(pg==='compare'){renderCompare();}
   else if(pg==='ytd'){renderYTD();}
@@ -897,7 +985,12 @@ function buildPills(id,active,cb){
     const btn=document.createElement('button');
     btn.className='mpill'+(m===active?' active':'');
     btn.textContent=m;
-    btn.onclick=()=>cb(m);
+    btn.onclick=()=>{
+      // FIX 4: immediately update all pills in this row
+      el.querySelectorAll('.mpill').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      cb(m);
+    };
     el.appendChild(btn);
   });
 }
@@ -907,7 +1000,6 @@ function buildPills(id,active,cb){
 // ════════════════════════════════════════════════════════
 let _sortStates={};
 function makeSortableTable(containerId,rows,columns){
-  // Preserve existing state; only initialize if truly new
   if(!_sortStates[containerId]){
     _sortStates[containerId]={col:null,dir:1,mode:null,filterVals:null};
   }
@@ -926,15 +1018,6 @@ function makeSortableTable(containerId,rows,columns){
       sorted=sorted.filter(r=>state.filterVals.includes(String(r[state.col])));
     }
     return sorted;
-  }
-  function renderDropdown(colKey){
-    const dd=document.getElementById(`sd-${containerId}-${colKey}`);
-    if(!dd)return;
-    dd.classList.toggle('hidden');
-    // close others
-    document.querySelectorAll('.sort-dropdown').forEach(d=>{
-      if(d.id!==`sd-${containerId}-${colKey}`)d.classList.add('hidden');
-    });
   }
   function buildTable(){
     const sorted=applySort();
@@ -969,16 +1052,14 @@ function makeSortableTable(containerId,rows,columns){
   }
   buildTable();
 }
-// Store rebuild callbacks
 const _sortTableCallbacks={};
 function rebuildSortTable(id){
   if(_sortTableCallbacks[id])_sortTableCallbacks[id]();
 }
 
-// close dropdowns on outside click
 document.addEventListener('click',()=>{
   document.querySelectorAll('.sort-dropdown').forEach(d=>d.classList.add('hidden'));
-  document.querySelectorAll('.multi-select-dropdown').forEach(d=>d.classList.add('hidden'));
+  document.querySelectorAll('.multi-select-dropdown,.bva-filter-dropdown').forEach(d=>d.classList.add('hidden'));
 });
 
 // ════════════════════════════════════════════════════════
@@ -1017,7 +1098,7 @@ function renderDashboard(){
 }
 
 // ════════════════════════════════════════════════════════
-//  BUDGETS PAGE — with income, expense sections + comments
+//  BUDGETS PAGE — FIX 1: show income & expense totals
 // ════════════════════════════════════════════════════════
 function renderBudgetForm(){
   const m=activeBgtMonth;
@@ -1035,8 +1116,8 @@ function renderBudgetForm(){
           <input type="number" step="0.01" min="0" value="${bgt[cat]||''}" placeholder="0"
             data-cat="${cat}" data-cur="${cur}" data-sec="${type}"
             style="width:100px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:inherit;font-size:11px;padding:5px 8px;outline:none;"
-            class="bgt-input">
-          <button class="ibt" title="Add comment" onclick="toggleBgtComment('${containsSingleQuote(cat)?'':''}${encodeURIComponent(cat)}','${cur}','${type}')" style="font-size:11px;">💬</button>
+            class="bgt-input" oninput="recalcBudgetTotals()">
+          <button class="ibt" title="Add comment" onclick="toggleBgtComment('${encodeURIComponent(cat)}','${cur}','${type}')" style="font-size:11px;">💬</button>
         </div>
         <div id="bgt-cmt-${cur}-${cat.replace(/[^a-z0-9]/gi,'_')}" style="${cmts[cat]?'':'display:none;'}margin-top:4px;">
           <input type="text" class="bgt-comment" data-cat="${cat}" data-cur="${cur}" placeholder="Comment…" value="${cmts[cat]||''}"
@@ -1052,6 +1133,42 @@ function renderBudgetForm(){
       ${incRows}
       <div class="bgt-sep" style="margin-top:12px;">Expense Categories</div>
       ${expRows}`;
+  });
+  // FIX 1: render budget totals banner after rows are built
+  recalcBudgetTotals();
+}
+
+// FIX 1: Live recalc of income & expense budget totals from input fields
+function recalcBudgetTotals(){
+  ['AED','INR'].forEach(cur=>{
+    const sfx=cur.toLowerCase();
+    const sym=cur==='AED'?'AED ':'₹';
+    const incCats=new Set(S.categories.income);
+    let incTotal=0, expTotal=0;
+    document.querySelectorAll(`.bgt-input[data-cur="${cur}"]`).forEach(inp=>{
+      const v=parseFloat(inp.value)||0;
+      const sec=inp.dataset.sec;
+      if(sec==='income') incTotal+=v;
+      else expTotal+=v;
+    });
+    const banner=document.getElementById(`bgt-totals-${sfx}`);
+    if(banner){
+      banner.innerHTML=`
+        <div class="bgt-total-item">
+          <div class="bgt-total-label">Budgeted Income</div>
+          <div class="bgt-total-val c-green">${sym}${fn(incTotal)}</div>
+        </div>
+        <div style="width:0.5px;background:var(--border2);align-self:stretch;"></div>
+        <div class="bgt-total-item">
+          <div class="bgt-total-label">Budgeted Expenses</div>
+          <div class="bgt-total-val c-red">${sym}${fn(expTotal)}</div>
+        </div>
+        <div style="width:0.5px;background:var(--border2);align-self:stretch;"></div>
+        <div class="bgt-total-item">
+          <div class="bgt-total-label">Net (Inc − Exp)</div>
+          <div class="bgt-total-val ${incTotal-expTotal>=0?'c-gold':'c-red'}">${sym}${fn(incTotal-expTotal)}</div>
+        </div>`;
+    }
   });
 }
 
@@ -1132,18 +1249,17 @@ function setActListCur(cur){
   actListCur=cur;
   document.getElementById('al-aed').classList.toggle('active',cur==='AED');
   document.getElementById('al-inr').classList.toggle('active',cur==='INR');
-  selectedCats=new Set(); // reset filter on currency change
+  selectedCats=new Set();
   buildCatFilterDropdown();
   refreshActList();
 }
 
 function onActFilterMonthChange(){
-  selectedCats=new Set(); // reset filter on month change
+  selectedCats=new Set();
   buildCatFilterDropdown();
   refreshActList();
 }
 
-// Build category filter dropdown — populates checkboxes from current month+cur transactions
 function buildCatFilterDropdown(){
   const filterM=document.getElementById('act-filter-month')?.value||S.months[S.months.length-1];
   const entries=S.actuals.filter(a=>a.month===filterM&&a.cur===actListCur);
@@ -1175,19 +1291,16 @@ function toggleCatSel(cat,checked){
   updateFilterLabel();
 }
 
-// Select All = check all boxes = filter to all = same as no filter visually but technically selects all
 function msSelectAll(){
   allAvailCats.forEach(c=>selectedCats.add(c));
   renderMsItems(document.getElementById('ms-search-inp')?.value||'');
   updateFilterLabel();
 }
-// None = uncheck all = no specific selection
 function msSelectNone(){
   selectedCats=new Set();
   renderMsItems(document.getElementById('ms-search-inp')?.value||'');
   updateFilterLabel();
 }
-// Clear filter entirely = back to show-all mode
 function clearCatFilter(){
   selectedCats=new Set();
   const inp=document.getElementById('ms-search-inp');if(inp)inp.value='';
@@ -1199,8 +1312,6 @@ function clearCatFilter(){
 function updateFilterLabel(){
   const lbl=document.getElementById('cat-filter-label');
   const clearBtn=document.getElementById('clear-filter-btn');
-  // "No selection" (empty set) means show all
-  // Any selection means filter to those items
   if(selectedCats.size===0){
     if(lbl)lbl.textContent='All Categories';
     if(clearBtn)clearBtn.style.display='none';
@@ -1217,8 +1328,7 @@ function toggleCatFilter(e){
   const dd=document.getElementById('cat-filter-dropdown');
   if(dd){
     const isHidden=dd.classList.contains('hidden');
-    // close all other dropdowns first
-    document.querySelectorAll('.multi-select-dropdown').forEach(d=>d.classList.add('hidden'));
+    document.querySelectorAll('.multi-select-dropdown,.bva-filter-dropdown').forEach(d=>d.classList.add('hidden'));
     if(isHidden)dd.classList.remove('hidden');
   }
 }
@@ -1230,11 +1340,9 @@ function applyFilterAndClose(){
 function refreshActList(){
   const filterM=document.getElementById('act-filter-month')?.value||S.months[S.months.length-1];
   let entries=S.actuals.filter(a=>a.month===filterM&&a.cur===actListCur).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  // Apply category filter
   if(selectedCats.size>0){
     entries=entries.filter(e=>selectedCats.has(e.cat));
   }
-  // Subtotal
   const banner=document.getElementById('subtotal-banner');
   if(selectedCats.size>0&&banner){
     const inc=entries.filter(e=>e.type==='income').reduce((s,e)=>s+(+e.amount||0),0);
@@ -1344,30 +1452,119 @@ function deleteTx(id){
 }
 
 // ════════════════════════════════════════════════════════
-//  BUDGET VS ACTUALS
+//  BUDGET VS ACTUALS — FIX 2 + FIX 3
 // ════════════════════════════════════════════════════════
 function setBvaCur(cur){
   bvaCur=cur;
   document.getElementById('bva-aed-tab').classList.toggle('active',cur==='AED');
   document.getElementById('bva-inr-tab').classList.toggle('active',cur==='INR');
+  bvaSelectedCats=new Set();
   renderBva();
 }
 
 function setBvaTblView(view){
   bvaTblView=view;
-  // Reset sort state when switching views so stale filters don't carry over
   _sortStates['bva-tbody-wrap']={col:null,dir:1,mode:null,filterVals:null};
+  // Reset BvA multi-select on view toggle
+  bvaSelectedCats=new Set();
   const expTab=document.getElementById('bva-tbl-exp-tab');
   const incTab=document.getElementById('bva-tbl-inc-tab');
   if(expTab){expTab.classList.toggle('active',view==='expense');expTab.style.borderColor=view==='expense'?'var(--red)':'';expTab.style.background=view==='expense'?'var(--red-bg)':'';}
   if(incTab){incTab.classList.toggle('active',view==='income');incTab.style.borderColor=view==='income'?'var(--green)':'';incTab.style.background=view==='income'?'var(--green-bg)':'';}
-  // Re-render just the table portion using stored data
   if(window._bvaLastData){
     const {sym,expRows,incRows}=window._bvaLastData;
-    document.getElementById('bva-tbl-title').textContent=view==='expense'?`Expense Detail — ${activeBvaMonth}`:`Income Detail — ${activeBvaMonth}`;
+    document.getElementById('bva-tbl-title').textContent=view==='expense'?'Variance Detail — Expenses':'Variance Detail — Income';
     const rows=view==='expense'?expRows:incRows;
+    // Rebuild BvA filter dropdown for new view
+    buildBvaFilterDropdown(rows);
     _sortTableCallbacks['bva-tbody-wrap']=()=>renderBvaTable(rows,sym,view);
     renderBvaTable(rows,sym,view);
+  }
+}
+
+// FIX 2: BvA multi-select filter functions
+function buildBvaFilterDropdown(rows){
+  bvaAllCats=rows.map(r=>r.cat).sort();
+  const inp=document.getElementById('bva-ms-search');
+  if(inp)inp.value='';
+  renderBvaMsItems('');
+  updateBvaFilterLabel();
+  // Show the filter wrap
+  const fw=document.getElementById('bva-filter-wrap');
+  if(fw)fw.style.display='';
+}
+
+function renderBvaMsItems(search){
+  const container=document.getElementById('bva-ms-items');
+  if(!container)return;
+  const filtered=search?bvaAllCats.filter(c=>c.toLowerCase().includes(search.toLowerCase())):bvaAllCats;
+  container.innerHTML=filtered.map(c=>{
+    const safeC=c.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<label class="ms-item">
+      <input type="checkbox" ${bvaSelectedCats.has(c)?'checked':''} onchange="toggleBvaCatSel('${safeC}',this.checked)">
+      ${c}
+    </label>`;
+  }).join('');
+}
+
+function filterBvaMsSearch(val){renderBvaMsItems(val);}
+
+function toggleBvaCatSel(cat,checked){
+  if(checked)bvaSelectedCats.add(cat);
+  else bvaSelectedCats.delete(cat);
+  updateBvaFilterLabel();
+}
+
+function bvaMsSelectAll(){
+  bvaAllCats.forEach(c=>bvaSelectedCats.add(c));
+  renderBvaMsItems(document.getElementById('bva-ms-search')?.value||'');
+  updateBvaFilterLabel();
+}
+function bvaMsSelectNone(){
+  bvaSelectedCats=new Set();
+  renderBvaMsItems(document.getElementById('bva-ms-search')?.value||'');
+  updateBvaFilterLabel();
+}
+function clearBvaFilter(){
+  bvaSelectedCats=new Set();
+  const inp=document.getElementById('bva-ms-search');if(inp)inp.value='';
+  renderBvaMsItems('');
+  updateBvaFilterLabel();
+  if(window._bvaLastData){
+    const {sym,expRows,incRows}=window._bvaLastData;
+    const rows=bvaTblView==='expense'?expRows:incRows;
+    renderBvaTable(rows,sym,bvaTblView);
+  }
+}
+function updateBvaFilterLabel(){
+  const lbl=document.getElementById('bva-filter-label');
+  const clearBtn=document.getElementById('bva-clear-filter-btn');
+  if(bvaSelectedCats.size===0){
+    if(lbl)lbl.textContent='All Items';
+    if(clearBtn)clearBtn.style.display='none';
+  }else if(bvaSelectedCats.size===1){
+    if(lbl)lbl.textContent=[...bvaSelectedCats][0].slice(0,18);
+    if(clearBtn)clearBtn.style.display='';
+  }else{
+    if(lbl)lbl.textContent=`${bvaSelectedCats.size} selected`;
+    if(clearBtn)clearBtn.style.display='';
+  }
+}
+function toggleBvaFilter(e){
+  if(e)e.stopPropagation();
+  const dd=document.getElementById('bva-filter-dropdown');
+  if(dd){
+    const isHidden=dd.classList.contains('hidden');
+    document.querySelectorAll('.multi-select-dropdown,.bva-filter-dropdown').forEach(d=>d.classList.add('hidden'));
+    if(isHidden)dd.classList.remove('hidden');
+  }
+}
+function applyBvaFilterAndClose(){
+  document.getElementById('bva-filter-dropdown')?.classList.add('hidden');
+  if(window._bvaLastData){
+    const {sym,expRows,incRows}=window._bvaLastData;
+    const rows=bvaTblView==='expense'?expRows:incRows;
+    renderBvaTable(rows,sym,bvaTblView);
   }
 }
 
@@ -1378,12 +1575,14 @@ function renderBva(){
   const aggExp=aggByCat(getActs(m,cur,'expense'));
   const aggInc=aggByCat(getActs(m,cur,'income'));
   const totalExpA=aggExp.reduce((s,e)=>s+e.amount,0);
-  const totalExpB=Object.values(bgt).reduce((s,v)=>s+v,0);
   const totalIncA=aggInc.reduce((s,e)=>s+e.amount,0);
   const net=totalIncA-totalExpA;
+
+  // FIX 3: Budget figures from Set Budgets tab — split by income/expense cats
+  const {incTotal: totalIncB, expTotal: totalExpB} = getBudgetTotals(m, cur);
+
   document.getElementById('bva-chart-title').textContent=`${cur} — Budget vs Actuals`;
 
-  // Chart uses expense cats only (budget-linked)
   const allExpCats=[...new Set([...Object.keys(bgt),...aggExp.map(e=>e.cat)])].sort();
   const budData=allExpCats.map(c=>bgt[c]||0);
   const actData=allExpCats.map(c=>{const e=aggExp.find(x=>x.cat===c);return e?e.amount:0;});
@@ -1393,46 +1592,102 @@ function renderBva(){
     {label:'Actual',data:actData,backgroundColor:acColors,borderRadius:2,borderWidth:0}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#71717a',font:{size:10},boxWidth:8}}},scales:{x:{ticks:{color:'#52525b',font:{size:9},maxRotation:40,autoSkip:false},grid:{color:'rgba(128,128,128,0.05)'}},y:{ticks:{color:'#52525b',font:{size:9},callback:v=>sym+fn(v)},grid:{color:'rgba(128,128,128,0.05)'}}}}});
 
+  // FIX 3: Summary card — budget figures now use correct split totals from Set Budgets
   document.getElementById('bva-summary').innerHTML=`
-    <div class="card-sm mb8"><div class="metric-label">Total Income</div><div class="metric-val c-green" style="font-size:15px;">${fc(totalIncA,sym)}</div></div>
-    <div class="card-sm mb8"><div class="metric-label">Total Expenses</div><div class="metric-val c-red" style="font-size:15px;">${fc(totalExpA,sym)}</div><div class="metric-sub">Budget: ${fc(totalExpB,sym)}</div></div>
-    <div class="card-sm mb8"><div class="metric-label">Net Balance</div><div class="metric-val ${net>=0?'c-green':'c-red'}" style="font-size:15px;">${fc(net,sym)}</div></div>
-    <div class="card-sm"><div class="metric-label">vs Budget</div><div class="metric-val ${totalExpA<=totalExpB?'c-green':'c-red'}" style="font-size:15px;">${totalExpB>0?fn((totalExpA/totalExpB)*100,1)+'%':'—'}</div><div class="metric-sub">${totalExpA<=totalExpB?'Under budget':'Over budget'}</div></div>
+    <div class="card-sm mb8">
+      <div class="metric-label">Total Income for the Month</div>
+      <div class="metric-val c-green" style="font-size:15px;">${fc(totalIncA,sym)}</div>
+      <div class="metric-sub">Budget: ${fc(totalIncB,sym)}</div>
+    </div>
+    <div class="card-sm mb8">
+      <div class="metric-label">Total Expense for the Month</div>
+      <div class="metric-val c-red" style="font-size:15px;">${fc(totalExpA,sym)}</div>
+      <div class="metric-sub">Budget: ${fc(totalExpB,sym)}</div>
+    </div>
+    <div class="card-sm mb8">
+      <div class="metric-label">Net Balance</div>
+      <div class="metric-val ${net>=0?'c-green':'c-red'}" style="font-size:15px;">${fc(net,sym)}</div>
+    </div>
+    <div class="card-sm">
+      <div class="metric-label">Expense vs Budget</div>
+      <div class="metric-val ${totalExpA<=totalExpB?'c-green':'c-red'}" style="font-size:15px;">${totalExpB>0?fn((totalExpA/totalExpB)*100,1)+'%':'—'}</div>
+      <div class="metric-sub">${totalExpA<=totalExpB?'Under budget':'Over budget'}</div>
+    </div>
   `;
 
-  // Build expense rows (budget-aware)
+  // Build expense rows (with budget comparison — only expense-type budget cats)
+  const incCatsSet=new Set(S.categories.income);
+  const expBgt={};
+  Object.entries(bgt).forEach(([k,v])=>{ if(!incCatsSet.has(k)) expBgt[k]=v; });
   const expRows=allExpCats.map(c=>{
-    const b=bgt[c]||0,ae=aggExp.find(x=>x.cat===c);const a=ae?ae.amount:0;
+    const b=expBgt[c]||0,ae=aggExp.find(x=>x.cat===c);const a=ae?ae.amount:0;
     const v=b-a;const pct=b>0?(a/b*100):null;
     const over=a>b&&b>0;const zero=a===0;
     const status=zero?'No spend':over?'Overrun':'On track';
     return {cat:c,budget:b,actual:a,variance:v,pct:pct!=null?+pct.toFixed(1):null,status};
   });
 
-  // Build income rows (actuals only — no budget comparison)
-  const incRows=aggInc.map(e=>({
-    cat:e.cat,budget:0,actual:e.amount,variance:e.amount,pct:null,status:'Income'
-  }));
+  // FIX 2: Build income rows WITH budget comparison (income budget cats from Set Budgets)
+  const incBgt={};
+  Object.entries(bgt).forEach(([k,v])=>{ if(incCatsSet.has(k)) incBgt[k]=v; });
+  const allIncCats=[...new Set([...Object.keys(incBgt),...aggInc.map(e=>e.cat)])].sort();
+  const incRows=allIncCats.map(c=>{
+    const b=incBgt[c]||0;
+    const ai=aggInc.find(x=>x.cat===c);const a=ai?ai.amount:0;
+    const v=a-b; // for income: variance = actual - budget (positive is good)
+    const pct=b>0?(a/b*100):null;
+    const over=a>b&&b>0;const zero=a===0&&b===0;
+    const status=zero?'No data':a>=b&&b>0?'On target':b===0?'Unbudgeted':'Below target';
+    return {cat:c,budget:b,actual:a,variance:v,pct:pct!=null?+pct.toFixed(1):null,status};
+  });
 
-  // Store for toggle re-use
   window._bvaLastData={sym,expRows,incRows};
 
-  // Apply current toggle state
+  // Build filter dropdown for current view
+  const currentRows=bvaTblView==='expense'?expRows:incRows;
+  buildBvaFilterDropdown(currentRows);
+
+  // Apply current toggle
   setBvaTblView(bvaTblView);
 }
 
 function renderBvaTable(rows,sym,view){
   view=view||bvaTblView;
+
+  // Apply multi-select filter if any selected
+  let filteredRows=rows;
+  if(bvaSelectedCats.size>0){
+    filteredRows=rows.filter(r=>bvaSelectedCats.has(r.cat));
+  }
+
+  // FIX 2: Show subtotal of filtered rows
+  const banner=document.getElementById('bva-subtotal-banner');
+  if(bvaSelectedCats.size>0&&banner){
+    const totalBudget=filteredRows.reduce((s,r)=>s+r.budget,0);
+    const totalActual=filteredRows.reduce((s,r)=>s+r.actual,0);
+    const totalVariance=filteredRows.reduce((s,r)=>s+r.variance,0);
+    const isIncome=view==='income';
+    banner.classList.remove('hidden');
+    banner.innerHTML=`
+      <span style="font-size:10px;color:var(--gold);font-weight:600;">Subtotal (${filteredRows.length} items):</span>
+      <span style="font-size:11px;color:var(--text2);">Budget: <span style="font-family:'JetBrains Mono',monospace;font-weight:500;">${sym}${fn(totalBudget)}</span></span>
+      <span style="font-size:11px;color:var(--text2);">Actual: <span style="font-family:'JetBrains Mono',monospace;font-weight:500;color:${isIncome?'var(--green)':'var(--text)'};">${sym}${fn(totalActual)}</span></span>
+      <span style="font-size:11px;color:var(--text2);">Variance: <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:${totalVariance>=0?'var(--green)':'var(--red)'};">${totalVariance>=0?'+':''}${sym}${fn(Math.abs(totalVariance))}</span></span>`;
+  }else if(banner){banner.classList.add('hidden');}
+
   if(view==='income'){
-    // Income view: just Category + Actual amount (no budget comparison)
-    makeSortableTable('bva-tbody-wrap',rows,[
+    // FIX 2: Income now has full Budget / Actual / Variance analysis
+    makeSortableTable('bva-tbody-wrap',filteredRows,[
       {key:'cat',label:'Category',render:r=>r.cat},
-      {key:'actual',label:'Actual Received',right:true,numeric:true,render:r=>`<span style="color:var(--green);">${fc(r.actual,sym)}</span>`},
-      {key:'status',label:'Type',render:r=>`<span class="badge badge-green">Income</span>`}
+      {key:'budget',label:'Budget',right:true,numeric:true,render:r=>r.budget>0?`<span style="color:var(--text2);">${fc(r.budget,sym)}</span>`:`<span style="color:var(--text3);">—</span>`},
+      {key:'actual',label:'Actual',right:true,numeric:true,render:r=>`<span style="color:var(--green);">${fc(r.actual,sym)}</span>`},
+      {key:'variance',label:'Variance',right:true,numeric:true,render:r=>`<span style="color:${r.variance>=0?'var(--green)':'var(--red)'};font-weight:500;">${r.variance>=0?'+':''}${fc(r.variance,sym)}</span>`},
+      {key:'pct',label:'% of Budget',right:true,numeric:true,render:r=>r.pct!=null?`<span style="color:${r.pct>=100?'var(--green)':'var(--orange)'};">${r.pct}%</span>`:`<span style="color:var(--text3);">—</span>`},
+      {key:'status',label:'Status',render:r=>`<span class="badge ${r.status==='No data'?'badge-gray':r.status==='On target'?'badge-green':r.status==='Unbudgeted'?'badge-blue':'badge-red'}">${r.status}</span>`}
     ]);
   }else{
     // Expense view: full budget vs actual comparison
-    makeSortableTable('bva-tbody-wrap',rows,[
+    makeSortableTable('bva-tbody-wrap',filteredRows,[
       {key:'cat',label:'Category',render:r=>r.cat},
       {key:'budget',label:'Budget',right:true,numeric:true,render:r=>fc(r.budget,sym)},
       {key:'actual',label:'Actual',right:true,numeric:true,render:r=>fc(r.actual,sym),color:r=>r.actual>r.budget&&r.budget>0?'var(--red)':''},
@@ -1457,7 +1712,6 @@ function setCatView(view){
 function renderCategories(){
   const m=activeCatMonth;
   if(catView==='income'){
-    // Show income categories for both currencies
     document.getElementById('cat-chart-title-1').textContent='AED — Income Split';
     document.getElementById('cat-chart-title-2').textContent='INR — Income Split';
     document.getElementById('cat-detail-title-1').textContent='AED — Income Detail';
@@ -1473,7 +1727,6 @@ function renderCategories(){
       document.getElementById(`cat-detail-${n}`).innerHTML=(bars||'<div class="empty-state">No income data</div>')+totalRow;
     });
   }else{
-    // Expense view for selected currency
     const cur=catView;
     const sym=cur==='AED'?'AED ':'₹';
     document.getElementById('cat-chart-title-1').textContent=`${cur} — Actual Spend Split`;
@@ -1494,7 +1747,7 @@ function renderCategories(){
 }
 
 // ════════════════════════════════════════════════════════
-//  MOM COMPARISON (was Compare)
+//  MOM COMPARISON
 // ════════════════════════════════════════════════════════
 function setCmpCur(cur){
   cmpCur=cur;
@@ -1515,7 +1768,6 @@ function renderCompare(){
     {type:'line',label:'Net',data:nets,borderColor:'#f59e0b',borderWidth:2,pointBackgroundColor:'#f59e0b',tension:0.35,fill:false,pointRadius:4}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#71717a',font:{size:9},boxWidth:7}}},scales:{x:{ticks:{color:'#52525b',font:{size:10}},grid:{color:'rgba(128,128,128,0.05)'}},y:{ticks:{color:'#52525b',font:{size:9},callback:v=>sym+fn(v)},grid:{color:'rgba(128,128,128,0.05)'}}}}});
   mkChart('ch-net',{type:'line',data:{labels:months,datasets:[{label:'Net',data:nets,borderColor:'#a855f7',backgroundColor:'rgba(168,85,247,0.08)',borderWidth:2,fill:true,tension:0.35,pointBackgroundColor:nets.map(v=>v>=0?'#22c55e':'#ef4444'),pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#52525b',font:{size:10}},grid:{color:'rgba(128,128,128,0.05)'}},y:{ticks:{color:'#52525b',font:{size:9},callback:v=>sym+fn(v)},grid:{color:'rgba(128,128,128,0.05)'}}}}});
-  // Expense category comparison
   const allExpCats=[...new Set(months.flatMap(m=>aggByCat(getActs(m,cur,'expense')).map(e=>e.cat)))].sort();
   const expEl=document.getElementById('cmp-table');
   if(allExpCats.length){
@@ -1529,7 +1781,6 @@ function renderCompare(){
     html+='</tbody></table>';
     expEl.innerHTML=html;
   }else{expEl.innerHTML='<div class="empty-state">No data</div>';}
-  // Income category comparison
   const allIncCats=[...new Set(months.flatMap(m=>aggByCat(getActs(m,cur,'income')).map(e=>e.cat)))].sort();
   const incEl=document.getElementById('cmp-income-table');
   if(allIncCats.length){
@@ -1651,7 +1902,6 @@ function renderAssets(){
     </tr>`;
   }).join('');
   tfoot.innerHTML=`<tr><td style="font-weight:500;">Total</td><td class="mono r" style="font-weight:500;">AED ${fn(totAed)}</td><td class="mono r" style="font-weight:500;">₹${fn(totInr)}</td><td colspan="2"></td></tr>`;
-  // AED equivalent for pie chart
   const pieData=assets.map(a=>({name:a.name,val:(a.aed||0)+((a.inr||0)/er)})).filter(a=>a.val>0);
   if(pieData.length){
     mkChart('ch-assets',{type:'doughnut',data:{labels:pieData.map(a=>a.name),datasets:[{data:pieData.map(a=>+a.val.toFixed(2)),backgroundColor:PAL,borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:'#a1a1aa',font:{size:9},boxWidth:8,padding:6}}}}});
@@ -1801,16 +2051,13 @@ function doSmartSearch(q){
   if(!q||q.length<2){el.classList.add('hidden');return;}
   q=q.toLowerCase();
   const results={transactions:[],categories:[],summary:[]};
-  // Search transactions
   S.actuals.forEach(a=>{
     const score=(a.cat||'').toLowerCase().includes(q)||(a.notes||'').toLowerCase().includes(q)||(a.bank||'').toLowerCase().includes(q)||(a.month||'').toLowerCase().includes(q)||String(a.amount).includes(q);
     if(score)results.transactions.push(a);
   });
-  // Search by category totals
   const catMap={};
   S.actuals.forEach(a=>{if((a.cat||'').toLowerCase().includes(q)){const k=a.cat+'-'+a.cur+'-'+a.type;if(!catMap[k])catMap[k]={cat:a.cat,cur:a.cur,type:a.type,total:0};catMap[k].total+=(+a.amount||0);}});
   results.categories=Object.values(catMap);
-  // Render
   if(!results.transactions.length&&!results.categories.length){
     el.innerHTML='<div class="empty-state" style="padding:14px;">No results found</div>';
     el.classList.remove('hidden');return;
@@ -1850,10 +2097,6 @@ function jumpToTx(id){
     selectedCats=new Set();
     buildCatFilterDropdown();
     refreshActList();
-    // Highlight
-    setTimeout(()=>{
-      const items=document.getElementById('act-list')?.querySelectorAll('[data-id]');
-    },200);
   },100);
 }
 
@@ -1877,7 +2120,6 @@ function exportExcel(){
     const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:12},{wch:5},{wch:8},{wch:22},{wch:12},{wch:14},{wch:20}];
     XLSX.utils.book_append_sheet(wb,ws,m);
   });
-  // Assets sheet
   if(S.assets&&S.assets.length){
     const ar=[['Particulars','AED','INR','Notes'],...S.assets.map(a=>[a.name,a.aed||0,a.inr||0,a.notes||''])];
     const was=XLSX.utils.aoa_to_sheet(ar);XLSX.utils.book_append_sheet(wb,was,'Assets');
